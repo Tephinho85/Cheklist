@@ -1,0 +1,210 @@
+<form [formGroup]="novoChecklistForm" (ngSubmit)="salvarNovoChecklist()" class="page-container">
+  
+  <ion-header class="ion-no-border header-inspecao">
+    <ion-toolbar color="primary">
+      <ion-buttons slot="start">
+        <ion-menu-button></ion-menu-button>
+      </ion-buttons>
+      <ion-title>
+        {{ modoEdicao ? 'Alterar Formulário Existente' : 'Criar Novo Formulário' }}
+      </ion-title>
+      <ion-buttons slot="end">
+        <ion-button fill="clear" (click)="abrirModalPesquisa()" title="Pesquisar Checklist Cadastrado">
+          <ion-icon slot="start" name="search-outline"></ion-icon>
+          Pesquisar
+        </ion-button>
+        <ion-button fill="clear" (click)="imprimirChecklist()" title="Imprimir Checklist">
+          <ion-icon slot="start" name="print-outline"></ion-icon>
+          Imprimir
+        </ion-button>
+        <ion-button *ngIf="modoEdicao" fill="clear" (click)="limparParaNovoCadastro()" title="Novo Formulário">
+          <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+          Novo
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+
+    <div class="checklist-branding">
+      <div class="branding-info">
+        <h1>{{ modoEdicao ? 'Editando Estrutura [' + codigoChecklistEdicao + ']' : 'Estrutura do Formulário' }}</h1>
+        <p>Configure os cabeçalhos e as perguntas multinível da planilha</p>
+      </div>
+    </div>
+  </ion-header>
+
+  <ion-content class="dark-content ion-padding">
+    
+    <div class="custom-select-card mb-12">
+      <ion-input 
+        label="Código" 
+        label-placement="stacked" 
+        type="text" 
+        placeholder="Ex: 000002" 
+        appUppercase
+        formControlName="codigo">
+      </ion-input>
+    </div>
+
+    <div class="custom-select-card mb-12">
+      <ion-input 
+        label="Descrição" 
+        label-placement="stacked" 
+        type="text" 
+        placeholder="Ex: Checklist Diário" 
+        appUppercase
+        formControlName="descricao">
+      </ion-input>
+    </div>
+
+    <div class="custom-select-card mb-24">
+      <ion-input 
+        label="Revisão" 
+        label-placement="stacked" 
+        type="text" 
+        placeholder="Ex: 02-10-2026" 
+        appUppercase
+        formControlName="revisao">
+      </ion-input>
+    </div>
+
+    <div class="custom-select-card mb-24">
+      <ion-input appUppercase label="Área responsável" label-placement="stacked" formControlName="setor" placeholder="Ex.: Produção, Logística, SESMT"></ion-input>
+    </div>
+
+    <div class="custom-select-card mb-24">
+      <ion-input
+        label="Meta mensal de inspeções"
+        label-placement="stacked"
+        type="number"
+        min="0"
+        formControlName="metaInspecoesMensais"
+        helperText="Informe 0 se a meta ainda não foi definida.">
+      </ion-input>
+    </div>
+
+    <div class="section-header flex-between mb-16">
+      <h2>Perguntas da Ficha</h2>
+      <ion-button fill="solid" size="small" color="primary" type="button" (click)="adicionarItemAoCadastro()">
+        <ion-icon slot="start" name="add-outline"></ion-icon>
+        Adicionar Linha
+      </ion-button>
+    </div>
+
+    <div formArrayName="itens">
+      @for (itemForm of itensArray.controls; track $index) {
+        <div [formGroupName]="$index" class="question-container mb-16">
+          
+          <div class="flex-between mb-12">
+            <span class="question-number">
+              Item #{{ $index + 1 }}
+            </span>
+            <ion-button fill="clear" color="danger" size="small" type="button" (click)="removerItemDoCadastro($index)">
+              <ion-icon slot="start" name="trash-outline"></ion-icon>
+              Excluir
+            </ion-button>
+          </div>
+
+          <div class="flex-gap-8 mb-12">
+            <ion-input 
+              type="text" 
+              placeholder="ID (Ex: 1.1)" 
+              appUppercase
+              formControlName="item" 
+              class="custom-input input-id">
+            </ion-input>
+
+            <ion-input 
+              type="text" 
+              placeholder="Descrição ou Pergunta" 
+              appUppercase
+              formControlName="descricao" 
+              class="custom-input flex-1">
+            </ion-input>
+          </div>
+
+          <div class="input-row mb-12">
+            <ion-select 
+              placeholder="Selecione o tipo de resposta" 
+              formControlName="tipoResposta" 
+              interface="popover" 
+              class="custom-select">
+              <ion-select-option value="">Apenas Título de Seção (Sem Pergunta / Sem Campo Obs)</ion-select-option>
+              <ion-select-option value="Selecao">Combobox (Status Seleção)</ion-select-option>
+              <ion-select-option value="Radio">Radiobox (Opções Visíveis)</ion-select-option>
+              <ion-select-option value="Numero">Número (Campos Numéricos)</ion-select-option>
+              <ion-select-option value="TextoLivre">Texto Livre (Resposta Escrita)</ion-select-option>
+            </ion-select>
+          </div>
+
+          @if (itemForm.get('tipoResposta')?.value === 'Selecao' || itemForm.get('tipoResposta')?.value === 'Radio') {
+            <div class="input-row mb-12">
+              <ion-input 
+                type="text" 
+                placeholder="Opções divididas por vírgula (Ex: Conforme,Não Conforme)" 
+                appUppercase
+                formControlName="opcoesTexto">
+              </ion-input>
+            </div>
+          }
+
+          @if (itemForm.get('tipoResposta')?.value !== '') {
+            <div class="radio-item py-4">
+              <ion-checkbox formControlName="obrigatorio" justify="start" label-placement="end">
+                Resposta Obrigatória?
+              </ion-checkbox>
+            </div>
+          }
+
+        </div>
+      }
+    </div>
+
+  </ion-content>
+
+  <ion-footer class="ion-no-border footer-action">
+    <ion-button 
+      expand="block" 
+      type="submit" 
+      [color]="modoEdicao ? 'warning' : 'primary'" 
+      class="btn-save-finish">
+      <ion-icon slot="start" name="save-outline"></ion-icon>
+      {{ modoEdicao ? 'SALVAR ALTERAÇÕES NO CHECKLIST' : 'SALVAR NOVO CHECKLIST' }}
+    </ion-button>
+  </ion-footer>
+</form>
+
+<!-- Modal para Pesquisar e Editar um Checklist Já Cadastrado -->
+<ion-modal [isOpen]="exibirModalPesquisa" (didDismiss)="fecharModalPesquisa()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar color="primary">
+        <ion-title>Pesquisar Checklist para Editar</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="fecharModalPesquisa()">
+            <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+      <ion-toolbar color="primary">
+        <ion-searchbar appUppercase
+          placeholder="Digite o código, descrição ou área..."
+          (ionInput)="filtrarChecklists($event)"
+          [debounce]="200">
+        </ion-searchbar>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <ion-list *ngIf="checklistsFiltrados.length > 0">
+        <ion-item *ngFor="let cl of checklistsFiltrados" button (click)="selecionarChecklistParaEdicao(cl)">
+          <ion-label>
+            <h2><strong>[{{ cl.codigo }}]</strong> - {{ cl.descricao }}</h2>
+            <p>Área: {{ cl.setor }} · Revisão: {{ cl.revisao }} · Meta: {{ cl.metaInspecoesMensais || 0 }}/mês</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+      <div *ngIf="checklistsFiltrados.length === 0" class="ion-text-center ion-padding">
+        <p>Nenhum checklist encontrado.</p>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>

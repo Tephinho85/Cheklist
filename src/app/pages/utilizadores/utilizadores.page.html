@@ -1,0 +1,94 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Usuários</ion-title>
+    <ion-buttons slot="end">
+      <ion-button aria-label="Adicionar usuário" (click)="abrirModalAdicionar()">
+        <ion-icon slot="icon-only" name="add-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-list *ngIf="utilizadores.length > 0; else semUtilizadores">
+    <ion-item *ngFor="let user of utilizadores" lines="full">
+      <ion-icon slot="start" name="person-outline" aria-hidden="true"></ion-icon>
+      <ion-label>
+        <h2>{{ user.nome }}</h2>
+        <p>{{ user.login }} · {{ user.setor }} · {{ user.perfil }}</p>
+        <p>{{ user.podeAssinar ? 'Pode assinar' : 'Não pode assinar' }}</p>
+      </ion-label>
+      <ion-badge [color]="user.ativo ? 'success' : 'medium'">
+        {{ user.ativo ? 'Ativo' : 'Inativo' }}
+      </ion-badge>
+      <ion-buttons slot="end">
+        <ion-button [attr.aria-label]="'Editar ' + user.nome" (click)="abrirModalEditar(user)">
+          <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+        </ion-button>
+        <ion-button [attr.aria-label]="(user.ativo ? 'Inativar ' : 'Ativar ') + user.nome" (click)="alternarStatus(user)">
+          <ion-icon slot="icon-only" name="power-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-item>
+  </ion-list>
+
+  <ng-template #semUtilizadores>
+    <ion-item lines="none">
+      <ion-label class="ion-text-center">Nenhum usuário cadastrado.</ion-label>
+    </ion-item>
+  </ng-template>
+
+  <ion-modal [isOpen]="isModalOpen" (didDismiss)="fecharModal()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>{{ isEditing ? 'Editar usuário' : 'Novo usuário' }}</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="fecharModal()">Cancelar</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <form [formGroup]="userForm" (ngSubmit)="salvarUtilizador()">
+          <ion-list>
+            <ion-item>
+              <ion-label position="stacked">Login</ion-label>
+              <ion-input appUppercase formControlName="login" autocomplete="username"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">Nome</ion-label>
+              <ion-input appUppercase formControlName="nome" autocomplete="name"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">Setor</ion-label>
+              <ion-input appUppercase formControlName="setor" placeholder="Ex.: Produção, Logística, SESMT"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label>Perfil</ion-label>
+              <ion-select formControlName="perfil" interface="popover">
+                <ion-select-option value="TITULAR">Titular</ion-select-option>
+                <ion-select-option value="AUXILIAR">Auxiliar</ion-select-option>
+              </ion-select>
+            </ion-item>
+            <ion-item>
+              <ion-label>Pode assinar</ion-label>
+              <ion-toggle formControlName="podeAssinar" slot="end"></ion-toggle>
+            </ion-item>
+            <ion-item>
+              <ion-label>Ativo</ion-label>
+              <ion-toggle formControlName="ativo" slot="end"></ion-toggle>
+            </ion-item>
+          </ion-list>
+          <div class="ion-padding">
+            <ion-button expand="block" type="submit" [disabled]="userForm.invalid">
+              {{ isEditing ? 'Salvar alterações' : 'Cadastrar usuário' }}
+            </ion-button>
+          </div>
+        </form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>

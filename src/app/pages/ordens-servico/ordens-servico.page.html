@@ -1,0 +1,144 @@
+<ion-header class="no-print">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Solicitações de OS</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <section class="os-summary no-print" aria-label="Resumo dos prazos">
+    <div><strong>{{ quantidade('DENTRO_DO_PRAZO') }}</strong><span>Dentro do prazo</span></div>
+    <div><strong>{{ quantidade('PROXIMA_DO_VENCIMENTO') }}</strong><span>Próximas</span></div>
+    <div><strong>{{ quantidade('VENCIDA') }}</strong><span>Vencidas</span></div>
+    <div><strong>{{ quantidade('CONCLUIDA') }}</strong><span>Concluídas</span></div>
+  </section>
+
+  <ion-list *ngIf="solicitacoes.length; else listaVazia">
+    <ion-item
+      *ngFor="let solicitacao of solicitacoes"
+      lines="full"
+      [class.print-only]="solicitacaoImpressao === solicitacao"
+      [class.hide-on-print]="solicitacaoImpressao !== null && solicitacaoImpressao !== solicitacao">
+      <ion-label>
+        <h2>{{ solicitacao.numero }} · Checklist {{ solicitacao.codigoChecklist }} · item {{ solicitacao.item }}</h2>
+        <p>{{ solicitacao.descricaoChecklist }} · {{ solicitacao.area }}</p>
+        <p>{{ solicitacao.pergunta }}</p>
+        <p><strong>Irregularidade:</strong> {{ solicitacao.irregularidade }}</p>
+        <p><strong>Correção:</strong> {{ solicitacao.correcaoSolicitada }}</p>
+        <p>Gestor: {{ solicitacao.gestorNome }} · {{ solicitacao.gestorEmail }} · {{ solicitacao.gestorWhatsapp }}</p>
+        <p>Solicitante: {{ solicitacao.solicitante }} · Abertura: {{ solicitacao.abertaEm | date:'dd/MM/yyyy HH:mm' }}</p>
+        <p>Prazo: {{ solicitacao.prazoCorrecao ? formatarPrazo(solicitacao.prazoCorrecao) : 'Aguardando informação do gestor' }}</p>
+        <ion-badge [color]="solicitacao.status === 'CONCLUIDA' ? 'tertiary' : solicitacao.status === 'EM_ANDAMENTO' ? 'primary' : 'medium'">
+          {{ rotuloStatus(solicitacao.status) }}
+        </ion-badge>
+        <ion-badge [color]="corPrazo(categoriaPrazo(solicitacao))">{{ rotuloPrazo(categoriaPrazo(solicitacao)) }}</ion-badge>
+        <ion-badge [color]="solicitacao.notificacaoStatus === 'ENVIADA' ? 'success' : solicitacao.notificacaoStatus === 'FALHOU' ? 'danger' : 'warning'">
+          Notificação {{ solicitacao.notificacaoStatus }}
+        </ion-badge>
+      </ion-label>
+
+      <ion-button class="no-print" slot="end" color="medium" fill="outline" size="small" (click)="imprimirOS(solicitacao)">
+        <ion-icon slot="start" name="print-outline"></ion-icon>
+        Imprimir OS
+      </ion-button>
+
+      <ion-button class="no-print" slot="end" fill="outline" size="small" (click)="abrirDetalhes(solicitacao)">
+        Acompanhar
+      </ion-button>
+
+      <ion-button
+        *ngIf="solicitacao.notificacaoStatus !== 'ENVIADA'"
+        class="no-print"
+        slot="end"
+        fill="clear"
+        size="small"
+        aria-label="Tentar enviar notificação novamente"
+        (click)="reenviarNotificacao(solicitacao)">
+        <ion-icon slot="icon-only" name="send-outline"></ion-icon>
+      </ion-button>
+    </ion-item>
+  </ion-list>
+
+  <ng-template #listaVazia>
+    <ion-item lines="none">
+      <ion-label class="ion-text-center">{{ erroCarregamento || 'Nenhuma solicitação de OS registrada.' }}</ion-label>
+    </ion-item>
+  </ng-template>
+
+  <ion-modal class="no-print" [isOpen]="detalhesAbertos" (didDismiss)="fecharDetalhes()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>{{ solicitacaoAtual?.numero || 'Acompanhar OS' }}</ion-title>
+          <ion-buttons slot="end"><ion-button (click)="fecharDetalhes()">Fechar</ion-button></ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding" *ngIf="solicitacaoAtual as os">
+        <h2>{{ os.descricaoChecklist }} · item {{ os.item }}</h2>
+        <p>{{ os.pergunta }}</p>
+        <p><strong>Irregularidade:</strong> {{ os.irregularidade }}</p>
+        <p><strong>Solicitante:</strong> {{ os.solicitante }} · <strong>Gestor:</strong> {{ os.gestorNome }}</p>
+        <p><strong>Aberta em:</strong> {{ os.abertaEm | date:'dd/MM/yyyy HH:mm' }}</p>
+
+        <form [formGroup]="acompanhamentoForm" (ngSubmit)="salvarAcompanhamento()">
+          <ion-item>
+            <ion-label position="stacked">Prazo informado pelo gestor</ion-label>
+            <ion-input type="date" formControlName="prazoCorrecao"></ion-input>
+          </ion-item>
+          <p *ngIf="os.informadoPor"><small>Informado por {{ os.informadoPor }}</small></p>
+          <ion-item>
+            <ion-label>Status</ion-label>
+            <ion-select formControlName="status" interface="popover">
+              <ion-select-option value="PENDENTE">Pendente</ion-select-option>
+              <ion-select-option value="EM_ANDAMENTO">Em andamento</ion-select-option>
+              <ion-select-option value="CONCLUIDA">Concluída</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <p *ngIf="os.dataConclusao"><small>Concluída em {{ os.dataConclusao | date:'dd/MM/yyyy HH:mm' }}</small></p>
+          <ion-item>
+            <ion-label position="stacked">Observação de acompanhamento</ion-label>
+            <ion-textarea appUppercase formControlName="observacao" rows="3" placeholder="Registre uma atualização"></ion-textarea>
+          </ion-item>
+          <ion-button expand="block" type="submit">Salvar atualização</ion-button>
+        </form>
+
+        <section class="photos-section">
+          <h3>Registro fotográfico</h3>
+          <div class="photo-grid">
+            <div>
+              <label class="photo-control">
+                <ion-icon name="camera-outline" aria-hidden="true"></ion-icon>
+                Foto antes da correção
+                <input type="file" accept="image/*" capture="environment" (change)="selecionarFoto($event, 'antes')">
+              </label>
+              <img *ngIf="urlsFoto[os.id + ':antes']" [src]="urlsFoto[os.id + ':antes']" alt="Situação antes da correção">
+            </div>
+            <div>
+              <label class="photo-control">
+                <ion-icon name="camera-outline" aria-hidden="true"></ion-icon>
+                Foto após a correção
+                <input type="file" accept="image/*" capture="environment" (change)="selecionarFoto($event, 'depois')">
+              </label>
+              <img *ngIf="urlsFoto[os.id + ':depois']" [src]="urlsFoto[os.id + ':depois']" alt="Situação após a correção">
+            </div>
+          </div>
+        </section>
+
+        <section class="history-section">
+          <h3>Histórico de acompanhamento</h3>
+          <ion-list>
+            <ion-item *ngFor="let evento of os.historico || []">
+              <ion-label>
+                <h3>{{ evento.descricao }}</h3>
+                <p>{{ evento.data | date:'dd/MM/yyyy HH:mm' }} · {{ evento.autor }}</p>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+          <p *ngIf="os.observacoes"><strong>Observações:</strong><br>{{ os.observacoes }}</p>
+        </section>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>

@@ -1,0 +1,156 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Dashboard de checklists</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  @if (erroCarregamento) {
+    <ion-item color="warning" lines="none">
+      <ion-label>{{ erroCarregamento }}</ion-label>
+    </ion-item>
+  }
+
+  <section class="dashboard-heading">
+    <div>
+      <h1>Acompanhamento de metas</h1>
+      
+      <!-- Nova navegação de setas do período -->
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <ion-button fill="clear" color="medium" size="small" (click)="alterarMes(-1)">
+          <ion-icon slot="icon-only" name="chevron-back-outline"></ion-icon>
+        </ion-button>
+        <p style="margin: 0; font-weight: 500;">{{ rotuloPeriodo | titlecase }}</p>
+        <ion-button fill="clear" color="medium" size="small" (click)="alterarMes(1)">
+          <ion-icon slot="icon-only" name="chevron-forward-outline"></ion-icon>
+        </ion-button>
+      </div>
+      
+    </div>
+    <ion-item class="period-picker" lines="none">
+      <ion-label position="stacked">Período</ion-label>
+      <ion-input type="month" [value]="periodo" (ionChange)="atualizarPeriodo($event)"></ion-input>
+    </ion-item>
+  </section>
+
+  <!-- ... (metric-grid e todas as tabelas e secções do dashboard abaixo mantêm-se iguais sem alterações) ... -->
+  <section class="metric-grid" aria-label="Resumo do período">
+    <article class="metric">
+      <span>Previstas</span>
+      <strong>{{ resultado.quantidadePrevista }}</strong>
+      <small>Metas cadastradas no mês</small>
+    </article>
+    <article class="metric">
+      <span>Realizadas</span>
+      <strong>{{ resultado.quantidadeRealizada }}</strong>
+      <small>{{ resultado.realizadasComMeta }} em checklists com meta</small>
+    </article>
+    <article class="metric">
+      <span>Cumprimento</span>
+      <strong>{{ percentual(resultado.percentualCumprimento) }}</strong>
+      <small>Realizadas ÷ previstas</small>
+    </article>
+    <article class="metric metric-pending">
+      <span>Pendências</span>
+      <strong>{{ resultado.pendencias }}</strong>
+      <small>Inspeções restantes para a meta</small>
+    </article>
+  </section>
+
+  <section class="dashboard-section">
+    <div class="section-heading">
+      <h2>Resultado por checklist</h2>
+      <span>{{ resultado.porChecklist.length }} tipos</span>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Checklist</th>
+            <th>Área</th>
+            <th>Previstas</th>
+            <th>Realizadas</th>
+            <th>Cumprimento</th>
+            <th>Pendências</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of resultado.porChecklist">
+            <td><strong>{{ item.codigo }}</strong><br>{{ item.descricao }}</td>
+            <td>{{ item.area }}</td>
+            <td>{{ item.prevista ?? 'Sem meta' }}</td>
+            <td>{{ item.realizada }}</td>
+            <td>
+              <div class="completion-cell">
+                <ion-badge [color]="item.cumprimento === null ? 'medium' : item.cumprimento >= 100 ? 'success' : 'warning'">
+                  {{ percentual(item.cumprimento) }}
+                </ion-badge>
+                <div class="progress-track" *ngIf="item.prevista">
+                  <span [style.width]="larguraBarra(item.realizada, item.prevista)"></span>
+                </div>
+              </div>
+            </td>
+            <td>{{ item.pendente ?? '—' }}</td>
+          </tr>
+          <tr *ngIf="resultado.porChecklist.length === 0">
+            <td colspan="6" class="empty-state">Nenhum checklist cadastrado.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="dashboard-section split-section">
+    <div>
+      <div class="section-heading">
+        <h2>Resultado por responsável</h2>
+        <span>{{ resultado.quantidadeRealizada }} inspeções</span>
+      </div>
+      <ion-list *ngIf="resultado.porResponsavel.length; else semResponsaveis">
+        <ion-item *ngFor="let pessoa of resultado.porResponsavel">
+          <ion-label>
+            <h3>{{ pessoa.nome }}</h3>
+            <p>{{ pessoa.realizada }} inspeção(ões) · {{ percentual(pessoa.percentual) }} do total</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+      <ng-template #semResponsaveis>
+        <p class="empty-state">Não há inspeções finalizadas no período.</p>
+      </ng-template>
+    </div>
+
+    <div>
+      <div class="section-heading">
+        <h2>Resultado por período</h2>
+        <span>Últimos 6 meses</span>
+      </div>
+      <div class="period-chart" *ngIf="resultado.porPeriodo.length">
+        <div class="period-column" *ngFor="let mes of resultado.porPeriodo">
+          <div class="bar-area" [attr.aria-label]="mes.rotulo + ': ' + mes.realizada + ' realizadas de ' + mes.prevista">
+            <span class="bar-planned" [style.height.%]="100"></span>
+            <span class="bar-done" [style.height]="larguraBarra(mes.realizada, mes.prevista)"></span>
+          </div>
+          <strong>{{ mes.realizada }}</strong>
+          <small>{{ mes.rotulo }}</small>
+        </div>
+      </div>
+      <p class="chart-legend"><span></span> Realizadas <i></i> Meta mensal</p>
+    </div>
+  </section>
+
+  <section class="dashboard-section" *ngIf="resultado.semMeta.length">
+    <div class="section-heading">
+      <h2>Metas não definidas</h2>
+      <ion-badge color="medium">{{ resultado.semMeta.length }}</ion-badge>
+    </div>
+    <p class="section-note">Esses checklists contam nas inspeções realizadas, mas não entram no percentual nem nas pendências até receberem uma meta mensal.</p>
+    <ion-list>
+      <ion-item *ngFor="let item of resultado.semMeta">
+        <ion-label>{{ item.codigo }} · {{ item.descricao }} <span slot="end">{{ item.realizada }} realizada(s)</span></ion-label>
+      </ion-item>
+    </ion-list>
+  </section>
+</ion-content>

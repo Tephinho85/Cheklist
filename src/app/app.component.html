@@ -1,0 +1,62 @@
+<ion-app>
+  <ion-menu contentId="main-content" type="overlay" class="custom-side-menu">
+    <ion-header class="ion-no-border">
+      <div class="menu-branding">
+        <h2>Painel Industrial</h2>
+        <p>v01.04.12-2025</p>
+      </div>
+    </ion-header>
+
+    <ion-content style="--background: #121620;">
+      <ion-list lines="none" class="menu-list">
+        
+        <ion-menu-toggle auto-hide="false">
+          <ion-item routerLink="/responder" routerDirection="root" detail="false" class="menu-item">
+            <span class="menu-icon">📋</span>
+            <ion-label>Responder Checklist</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
+        <ion-menu-toggle auto-hide="false">
+          <ion-item routerLink="/cadastrar" routerDirection="root" detail="false" class="menu-item">
+            <span class="menu-icon">⚙️</span>
+            <ion-label>Cadastrar Checklist</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
+        <ion-menu-toggle auto-hide="false">
+          <ion-item routerLink="/utilizadores" routerDirection="root" detail="false" class="menu-item">
+            <span class="menu-icon">👥</span>
+            <ion-label>Gerenciar Usuários</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
+        <ion-menu-toggle auto-hide="false">
+          <ion-item routerLink="/gestores" routerDirection="root" detail="false" class="menu-item">
+            <span class="menu-icon">📨</span>
+            <ion-label>Gestores por Área</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
+        <ion-menu-toggle auto-hide="false">
+          <ion-item routerLink="/ordens-servico" routerDirection="root" detail="false" class="menu-item">
+            <span class="menu-icon">🛠️</span>
+            <ion-label>Solicitações de OS</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
+        <ion-menu-toggle auto-hide="false">
+          <ion-item routerLink="/dashboard-checklists" routerDirection="root" detail="false" class="menu-item">
+            <span class="menu-icon">📊</span>
+            <ion-label>Dashboard de Checklists</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
+      </ion-list>
+    </ion-content>
+  </ion-menu>
+
+  <div class="ion-page" id="main-content">
+    <ion-router-outlet></ion-router-outlet>
+  </div>
+</ion-app>

@@ -1,0 +1,24 @@
+.mb-12 { margin-bottom: 12px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-24 { margin-bottom: 24px; }
+.py-4 { padding: 4px 0; }
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flex-gap-8 {
+  display: flex;
+  gap: 8px;
+}
+
+.flex-1 { flex: 1; }
+.input-id { flex: 0 0 90px; }
+
+.question-number {
+  /* Trocado o fallback do azul (#3880ff) para o vermelho Frisa (#d32f2f) */
+  color: var(--ion-color-primary, #d32f2f); 
+  font-weight: bold;
+}

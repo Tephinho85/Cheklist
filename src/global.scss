@@ -1,0 +1,366 @@
+@use "sass:color";
+
+@import "@ionic/angular/css/core.css";
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+// ============================================================================
+// VARIÁVEIS E TEMAS
+// ============================================================================
+$bg-light-primary: #f8fafc;
+$bg-card: #ffffff;
+$text-main: #0f172a;
+$text-muted: #64748b;
+$border-color: #e2e8f0;
+
+ion-header > ion-toolbar {
+  --background: var(--ion-color-primary);
+  --color: var(--ion-color-primary-contrast);
+  --opacity: 1;
+
+  ion-title,
+  ion-button,
+  ion-menu-button,
+  ion-back-button {
+    --color: var(--ion-color-primary-contrast);
+    color: var(--ion-color-primary-contrast);
+  }
+}
+
+.page-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.loading-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: $text-muted;
+  gap: 12px;
+}
+
+.dark-content {
+  --background: #{$bg-light-primary};
+  padding: 12px;
+}
+
+// ============================================================================
+// CABEÇALHO E PROGRESSO
+// ============================================================================
+.progress-bar-container {
+  background-color: var(--ion-color-primary);
+  padding: 8px 16px 12px;
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: #ffffff;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  ion-progress-bar {
+    height: 6px;
+    border-radius: 3px;
+  }
+}
+
+.combobox-container {
+  background-color: #ffffff;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid $border-color;
+
+  .combobox-wrapper {
+    flex: 1;
+
+    .combobox-label {
+      font-size: 0.75rem;
+      color: $text-muted;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .checklist-combobox {
+      --padding-start: 8px;
+      border: 1px solid $border-color;
+      border-radius: 6px;
+      height: 40px;
+    }
+  }
+
+  .action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-top: 14px;
+  }
+}
+
+.checklist-branding {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f1f5f9;
+  padding: 12px 16px;
+  border-bottom: 1px solid $border-color;
+
+  .branding-info {
+    h1 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: $text-main;
+    }
+
+    p {
+      margin: 2px 0 0;
+      font-size: 0.8rem;
+      color: $text-muted;
+    }
+  }
+}
+
+// ============================================================================
+// CARDS E PERGUNTAS DE INSPEÇÃO
+// ============================================================================
+.section-header {
+  padding: 16px 8px 8px;
+
+  h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: $text-main;
+    margin: 0;
+  }
+
+  .section-subtitle {
+    font-size: 0.8rem;
+    color: $text-muted;
+  }
+}
+
+.question-container {
+  background: $bg-card;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 1px solid $border-color;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+  .question-text {
+    font-size: 0.95rem;
+    color: $text-main;
+    margin: 0 0 12px 0;
+    line-height: 1.4;
+
+    .required-star {
+      color: var(--ion-color-danger);
+      margin-left: 2px;
+    }
+  }
+
+  .input-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 10px;
+
+    label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: $text-muted;
+    }
+
+    ion-input, ion-select {
+      border: 1px solid $border-color;
+      border-radius: 6px;
+      --padding-start: 10px;
+      --padding-end: 10px;
+      background: #fafafa;
+    }
+  }
+
+  .observation-row {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed $border-color;
+  }
+
+  .error-note {
+    font-size: 0.75rem;
+    margin-top: 4px;
+    display: block;
+  }
+}
+
+.radio-group-container {
+  margin-bottom: 10px;
+
+  .group-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: $text-muted;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .radio-item {
+    --background: #fafafa;
+    border: 1px solid $border-color;
+    border-radius: 6px;
+    margin-bottom: 6px;
+
+    ion-radio {
+      font-size: 0.9rem;
+      padding: 8px;
+    }
+  }
+}
+
+// ============================================================================
+// FOOTER
+// ============================================================================
+.footer-action {
+  padding: 12px 16px;
+  background-color: #ffffff;
+  border-top: 1px solid $border-color;
+
+  .btn-save-finish {
+    margin: 0;
+    font-weight: 700;
+    --border-radius: 6px;
+  }
+}
+
+/* ============================================================================
+   AJUSTE DE CONTRASTE: SELETOR DE CHECKLIST (CAMPO FECHADO + POPOVER)
+   ============================================================================ */
+
+/* 1. Estilização do campo do select na página */
+.checklist-combobox-select {
+  --background: #ffffff !important;
+  --color: #0f172a !important; /* Texto grafite/preto de alto contraste */
+  --placeholder-color: #64748b !important;
+  color: #0f172a !important;
+  font-weight: 600;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding-left: 12px;
+  height: 44px;
+
+  /* Garante cor escura no texto interno renderizado pelo Ionic */
+  &::part(text) {
+    color: #0f172a !important;
+  }
+
+  &::part(icon) {
+    color: #0f172a !important; /* Cor da seta para baixo */
+    opacity: 1;
+  }
+}
+
+/* 2. Estilização da lista de opções (Popover aberto) */
+.custom-popover-width {
+  --background: #ffffff !important;
+
+  ion-item {
+    --background: #ffffff !important;
+    --color: #0f172a !important; /* Texto escuro das opções */
+    --color-hover: #ba2929 !important;
+    --border-color: #e2e8f0 !important;
+
+    ion-label {
+      color: #0f172a !important;
+      font-weight: 500;
+      white-space: normal !important;
+    }
+
+    /* Destaque no item selecionado ou ao passar o mouse */
+    &.item-radio-checked, &:hover {
+      --background: #ffebee !important;
+      --color: #ba2929 !important;
+      
+      ion-label {
+        color: #ba2929 !important;
+        font-weight: 700;
+      }
+    }
+  }
+}
+
+/* ============================================================================
+   CORREÇÃO DE VISIBILIDADE DO TEXTO NO ION-SELECT
+   ============================================================================ */
+
+/* Container com a borda e fundo, sem cortar nada */
+.custom-select-card {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 12px;
+  width: 100%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Limpa as bordas nativas do ion-select interno */
+ion-select.checklist-combobox-select {
+  --background: transparent !important;
+  --color: #0f172a !important;
+  --placeholder-color: #64748b !important;
+  --placeholder-opacity: 1 !important;
+  --padding-start: 0 !important;
+  --padding-end: 0 !important;
+  --padding-top: 0 !important;
+  --padding-bottom: 0 !important;
+  
+  width: 100%;
+  min-height: auto !important;
+  border: none !important;
+  background: transparent !important;
+
+  &::part(text) {
+    color: #0f172a !important;
+    font-weight: 700;
+    font-size: 1rem;
+    padding-top: 4px;
+  }
+
+  &::part(label) {
+    color: #64748b !important;
+    font-weight: 500;
+    font-size: 0.85rem;
+  }
+
+  &::part(icon) {
+    color: #0f172a !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Define o fundo do header e da barra de ações como branco */
+ion-header.header-inspecao {
+  background: #ffffff !important;
+  --background: #ffffff !important;
+}
+
+ion-input:not([type='password']):not([type='email'])::part(native),
+ion-textarea::part(native),
+ion-searchbar::part(input),
+ion-select::part(text) {
+  text-transform: uppercase;
+}

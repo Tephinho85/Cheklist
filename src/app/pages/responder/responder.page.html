@@ -1,0 +1,267 @@
+<div *ngIf="carregando" class="loading-container">
+  <ion-spinner name="crescent" color="primary"></ion-spinner>
+  <p>Carregando checklist...</p>
+</div>
+
+<form [formGroup]="checklistForm" (ngSubmit)="salvarChecklist()" *ngIf="!carregando && checklistForm" class="page-container">
+  
+  <ion-header class="ion-no-border header-inspecao">
+    <ion-toolbar color="primary">
+      <ion-buttons slot="start">
+        <ion-menu-button></ion-menu-button>
+      </ion-buttons>
+      <ion-title>Responder Checklist</ion-title>
+    </ion-toolbar>
+
+    <!-- Barra de Progresso -->
+    <div class="progress-bar-container">
+      <div class="progress-info">
+        <span>Progresso da Auditoria</span>
+        <span>{{ obterProgresso() | percent:'1.0-0' }}</span>
+      </div>
+      <ion-progress-bar [value]="obterProgresso()" color="success"></ion-progress-bar>
+    </div>
+
+    <!-- Novo Botão de Pesquisa (Substitui o Select) -->
+    <div class="custom-select-card" style="margin-top: 10px; cursor: pointer;">
+      <ion-item lines="none" detail="false" (click)="abrirPesquisa()" style="--background: transparent; cursor: pointer;">
+        <ion-label position="stacked" style="color: var(--ion-color-medium);">Selecione o Checklist:</ion-label>
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 8px;">
+          <strong *ngIf="checklistAtual" style="font-size: 1.1em;">
+            [{{ checklistAtual.codigo }}] - {{ checklistAtual.descricao }}
+          </strong>
+          <span *ngIf="!checklistAtual" style="color: var(--ion-color-medium);">Tocar para pesquisar...</span>
+          <ion-icon name="search-outline" color="primary"></ion-icon>
+        </div>
+      </ion-item>
+    </div>
+
+    <!-- Ações do Checklist -->
+    <div class="action-buttons">
+      <ion-button fill="clear" size="small" color="secondary" (click)="clonarChecklistAtual()" title="Clonar Checklist">
+        <ion-icon slot="icon-only" name="copy-outline"></ion-icon>
+      </ion-button>
+      <ion-button fill="clear" size="small" color="warning" (click)="editarChecklistAtual()" title="Editar Checklist">
+        <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+      </ion-button>
+      <ion-button fill="clear" size="small" color="danger" (click)="confirmarExclusaoChecklist()" title="Excluir Checklist">
+        <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+      </ion-button>
+      <ion-button fill="clear" size="small" color="tertiary" (click)="imprimirPDF()" title="Imprimir Checklist">
+        <ion-icon slot="icon-only" name="print-outline"></ion-icon>
+      </ion-button>
+      <!-- Botão para abrir o histórico de inspeções salvas -->
+      <ion-button fill="clear" size="small" color="success" (click)="abrirModalHistorico()" title="Histórico de Inspeções">
+        <ion-icon slot="icon-only" name="time-outline"></ion-icon>
+      </ion-button>
+    </div>
+    
+    <!-- Cabeçalho do Checklist Selecionado -->
+    <div class="checklist-branding" *ngIf="checklistAtual">
+      <div class="branding-info">
+        <h1>{{ checklistAtual.descricao }}</h1>
+        <p>Código: {{ checklistAtual.codigo }} | Revisão: {{ checklistAtual.revisao }}</p>
+      </div>
+      <ion-button fill="outline" color="danger" size="small" (click)="limparRespostas()">
+        Limpar Ficha
+      </ion-button>
+    </div>
+  </ion-header>
+
+  <ion-content class="dark-content">
+    <div *ngIf="checklistAtual" class="questions-list">
+      <div *ngFor="let item of checklistAtual.itens">
+        
+        <!-- Cabeçalho de Secção -->
+        <div *ngIf="!item.tipoResposta" class="section-header">
+          <h2>{{ item.item }} - {{ item.descricao }}</h2>
+          <span class="section-subtitle">Secção de Auditoria</span>
+        </div>
+
+        <!-- Card de Pergunta -->
+        <div *ngIf="item.tipoResposta" class="question-container">
+          <p class="question-text">
+            <strong>{{ item.item }}.</strong> {{ item.descricao }}
+            <span *ngIf="item.obrigatorio" class="required-star">*</span>
+          </p>
+
+          <!-- Resposta tipo Seleção -->
+          <div *ngIf="item.tipoResposta === 'Selecao'" class="input-row">
+            <ion-label>Avaliação</ion-label>
+            <ion-select 
+              placeholder="Selecione o status" 
+              [formControlName]="obterChaveSanitizada('resposta', checklistAtual.codigo, item.item)" 
+              (ionChange)="verificarObrigatoriedadeObservacao(item.item, $event.detail.value)" 
+              interface="popover" 
+              class="custom-select">
+              <ion-select-option *ngFor="let opcao of item.opcoes" [value]="opcao">{{ opcao | uppercase }}</ion-select-option>
+            </ion-select>
+          </div>
+
+          <!-- Resposta tipo Radio -->
+          <div *ngIf="item.tipoResposta === 'Radio'" class="radio-group-container">
+            <ion-label class="group-label">Escolha uma opção:</ion-label>
+            <ion-radio-group [formControlName]="obterChaveSanitizada('resposta', checklistAtual.codigo, item.item)" (ionChange)="verificarObrigatoriedadeObservacao(item.item, $event.detail.value)">
+              <ion-item *ngFor="let opcao of item.opcoes" lines="none" class="radio-item">
+                <ion-radio [value]="opcao" label-placement="end" justify="start">{{ opcao | uppercase }}</ion-radio>
+              </ion-item>
+            </ion-radio-group>
+          </div>
+
+          <!-- Resposta tipo Número -->
+          <div *ngIf="item.tipoResposta === 'Numero'" class="input-row">
+            <ion-label>Medição (Número)</ion-label>
+            <ion-input type="number" placeholder="Digite o valor numérico..." [formControlName]="obterChaveSanitizada('resposta', checklistAtual.codigo, item.item)"></ion-input>
+          </div>
+
+          <!-- Resposta tipo Texto Livre -->
+          <div *ngIf="item.tipoResposta === 'TextoLivre'" class="input-row">
+            <ion-label>Resposta Textual</ion-label>
+            <ion-input appUppercase type="text" placeholder="Digite a resposta por extenso..." [formControlName]="obterChaveSanitizada('resposta', checklistAtual.codigo, item.item)"></ion-input>
+          </div>
+
+          <!-- Campo de Observação -->
+          <div *ngIf="item.observacaoTipo === 'Texto Livre'" class="input-row observation-row">
+            <ion-label>Observação</ion-label>
+            <ion-input appUppercase type="text" placeholder="Justificativa ou desvio encontrado..." [formControlName]="obterChaveSanitizada('observacao', checklistAtual.codigo, item.item)"></ion-input>
+          </div>
+
+          <ion-button
+            *ngIf="isRespostaNaoConforme(item.item)"
+            fill="outline"
+            color="danger"
+            size="small"
+            (click)="abrirSolicitacaoOs(item)">
+            Solicitar Ordem de Serviço
+          </ion-button>
+
+          <!-- Mensagem de erro/validação -->
+          <ion-note 
+            color="danger" 
+            class="error-note" 
+            *ngIf="isCampoInvalido('resposta', checklistAtual.codigo, item.item)">
+            Este campo é de preenchimento obrigatório.
+          </ion-note>
+        </div>
+
+      </div>
+    </div>
+  </ion-content>
+
+  <ion-footer class="ion-no-border footer-action">
+    <ion-button expand="block" type="submit" color="primary" class="btn-save-finish">
+      <ion-icon slot="start" name="save-outline"></ion-icon>
+      GRAVAR E FINALIZAR INSPEÇÃO
+    </ion-button>
+  </ion-footer>
+</form>
+
+<!-- Modal de Pesquisa de Checklists Inteligente -->
+<ion-modal [isOpen]="exibirModalPesquisa" (didDismiss)="fecharPesquisa()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar color="primary">
+        <ion-title>Buscar Checklist</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="fecharPesquisa()">
+            <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+      <ion-toolbar color="primary">
+        <ion-searchbar appUppercase
+          placeholder="Digite o código ou nome..." 
+          (ionInput)="filtrarChecklists($event)"
+          [debounce]="250">
+        </ion-searchbar>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <ion-list *ngIf="checklistsFiltrados.length > 0">
+        <ion-item *ngFor="let cl of checklistsFiltrados" button (click)="selecionarChecklistPelaPesquisa(cl.codigo)">
+          <ion-label>
+            <h2><strong>[{{ cl.codigo }}]</strong></h2>
+            <p>{{ cl.descricao }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+      <div *ngIf="checklistsFiltrados.length === 0" class="ion-text-center ion-padding" style="color: var(--ion-color-medium); margin-top: 20px;">
+        <ion-icon name="search-outline" style="font-size: 48px;"></ion-icon>
+        <p>Nenhum checklist encontrado com esse termo.</p>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<!-- Modal com Histórico de Inspeções Finalizadas -->
+<ion-modal [isOpen]="exibirModalHistorico" (didDismiss)="fecharModalHistorico()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar color="primary">
+        <ion-title>Histórico de Inspeções</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="fecharModalHistorico()">Fechar</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <div *ngIf="historicoInspecoes.length === 0" class="ion-text-center ion-padding">
+        <p>Nenhuma inspeção foi gravada até o momento.</p>
+      </div>
+
+      <ion-list *ngIf="historicoInspecoes.length > 0">
+        <ion-item *ngFor="let item of historicoInspecoes; let i = index">
+          <ion-label>
+            <h2><strong>[{{ item.codigoChecklist }}]</strong> {{ item.descricao }}</h2>
+            <p>Data: {{ item.dataExecucao | date:'dd/MM/yyyy HH:mm' }}</p>
+            <p>Respostas gravadas: {{ item.respostas.length }}</p>
+          </ion-label>
+          <ion-button fill="outline" slot="end" size="small" color="primary" (click)="restaurarInspecaoDoHistorico(item)">
+            Carregar
+          </ion-button>
+        </ion-item>
+      </ion-list>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<ion-modal [isOpen]="exibirModalSolicitacaoOs" (didDismiss)="fecharModalSolicitacaoOs()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar color="primary">
+        <ion-title>Solicitar Ordem de Serviço</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="fecharModalSolicitacaoOs()">Cancelar</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <p *ngIf="checklistAtual && itemOsSelecionado">
+        Checklist {{ checklistAtual.codigo }} · item {{ itemOsSelecionado.item }} · {{ checklistAtual.setor || 'Área não definida' }}
+      </p>
+      <form [formGroup]="solicitacaoOsForm" (ngSubmit)="salvarSolicitacaoOs()">
+        <ion-list>
+          <ion-item>
+            <ion-label position="stacked">Gestor responsável</ion-label>
+            <ion-select formControlName="gestorId" interface="popover" placeholder="Selecione o gestor">
+              <ion-select-option *ngFor="let gestor of gestoresDaArea" [value]="gestor.id">
+                {{ gestor.nome }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Irregularidade identificada</ion-label>
+            <ion-textarea appUppercase formControlName="irregularidade" rows="3" placeholder="Descreva o problema encontrado"></ion-textarea>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Correção solicitada</ion-label>
+            <ion-textarea appUppercase formControlName="correcaoSolicitada" rows="3" placeholder="Descreva a ação necessária"></ion-textarea>
+          </ion-item>
+        </ion-list>
+        <ion-button expand="block" type="submit" [disabled]="solicitacaoOsForm.invalid">
+          Gerar solicitação e notificar gestor
+        </ion-button>
+      </form>
+    </ion-content>
+  </ng-template>
+</ion-modal>

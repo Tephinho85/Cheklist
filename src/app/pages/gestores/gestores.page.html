@@ -1,0 +1,99 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Gestores por área</ion-title>
+    <ion-buttons slot="end">
+      <ion-button aria-label="Adicionar gestor" (click)="abrirNovoGestor()">
+        <ion-icon slot="icon-only" name="add-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  @if (erroCarregamento) {
+    <ion-item color="danger" lines="none">
+      <ion-label>{{ erroCarregamento }}</ion-label>
+    </ion-item>
+  }
+
+  @if (carregando) {
+    <ion-item lines="none">
+      <ion-label class="ion-text-center">Carregando gestores...</ion-label>
+    </ion-item>
+  }
+
+  <ion-list *ngIf="gestores.length; else listaVazia">
+    <ion-item *ngFor="let gestor of gestores">
+      <ion-icon slot="start" name="person-outline" aria-hidden="true"></ion-icon>
+      <ion-label>
+        <h2>{{ gestor.nome }}</h2>
+        <p>{{ gestor.area }} · {{ gestor.email }}</p>
+        <p>{{ gestor.whatsapp }}</p>
+      </ion-label>
+      <ion-badge [color]="gestor.ativo ? 'success' : 'medium'">
+        {{ gestor.ativo ? 'Ativo' : 'Inativo' }}
+      </ion-badge>
+      <ion-buttons slot="end">
+        <ion-button [attr.aria-label]="'Editar ' + gestor.nome" (click)="abrirEdicao(gestor)">
+          <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+        </ion-button>
+        <ion-button color="danger" [attr.aria-label]="'Excluir ' + gestor.nome" (click)="excluirGestor(gestor)">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-item>
+  </ion-list>
+
+  <ng-template #listaVazia>
+    @if (!carregando && !erroCarregamento) {
+      <ion-item lines="none">
+        <ion-label class="ion-text-center">Nenhum gestor cadastrado.</ion-label>
+      </ion-item>
+    }
+  </ng-template>
+
+  <ion-modal [isOpen]="isModalOpen" (didDismiss)="fecharModal()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>{{ gestorEmEdicao ? 'Editar gestor' : 'Novo gestor' }}</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="fecharModal()">Cancelar</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <form [formGroup]="gestorForm" (ngSubmit)="salvarGestor()">
+          <ion-list>
+            <ion-item>
+              <ion-label position="stacked">Nome do gestor</ion-label>
+              <ion-input appUppercase formControlName="nome" autocomplete="name"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">Área/setor</ion-label>
+              <ion-input appUppercase formControlName="area" placeholder="Ex.: Produção, Logística, SESMT"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">E-mail</ion-label>
+              <ion-input formControlName="email" type="email" autocomplete="email"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">WhatsApp com DDD</ion-label>
+              <ion-input formControlName="whatsapp" type="tel" autocomplete="tel" placeholder="+55 11 99999-9999"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label>Cadastro ativo</ion-label>
+              <ion-toggle formControlName="ativo" slot="end"></ion-toggle>
+            </ion-item>
+          </ion-list>
+          <div class="ion-padding">
+            <ion-button expand="block" type="submit" [disabled]="gestorForm.invalid">Salvar gestor</ion-button>
+          </div>
+        </form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>

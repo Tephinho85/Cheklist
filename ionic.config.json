@@ -1,0 +1,7 @@
+{
+  "name": "app-checklist",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

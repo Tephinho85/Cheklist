@@ -1,0 +1,68 @@
+<ion-content class="ion-padding" color="light">
+  
+  <div class="login-wrapper">
+    
+    <!-- Cabeçalho / Logo -->
+    <div class="logo-container">
+      <ion-icon name="shield-checkmark-outline" color="primary" style="font-size: 64px;"></ion-icon>
+      <h1 class="app-title">Checklist Digital</h1>
+      <p style="color: #64748b; margin-top: 0;">Acesse com suas credenciais</p>
+    </div>
+
+    <!-- Formulário de Login -->
+    <form [formGroup]="loginForm" (ngSubmit)="fazerLogin()">
+      
+    <!-- Campo E-mail / Usuário -->
+      <div class="mb-16">
+        <ion-input 
+          label="Usuário ou E-mail" 
+          label-placement="stacked" 
+          type="text" 
+          placeholder="Digite seu usuário" 
+          fill="outline"
+          formControlName="email"
+          appUppercase
+          (ionInput)="converterParaMaiusculo($event)">
+          <ion-icon slot="start" name="person-outline" aria-hidden="true"></ion-icon>
+        </ion-input>
+      </div>
+
+      <!-- Campo Senha -->
+      <div class="mb-24">
+        <ion-input 
+          label="Senha" 
+          label-placement="stacked" 
+          [type]="mostrarSenha ? 'text' : 'password'" 
+          placeholder="Sua senha de acesso" 
+          fill="outline"
+          formControlName="senha">
+          <ion-icon slot="start" name="lock-closed-outline" aria-hidden="true"></ion-icon>
+          <ion-button
+            slot="end"
+            fill="clear"
+            type="button"
+            [attr.aria-label]="mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'"
+            (click)="alternarVisibilidadeSenha()">
+            <ion-icon [name]="mostrarSenha ? 'eye-off-outline' : 'eye-outline'" aria-hidden="true"></ion-icon>
+          </ion-button>
+        </ion-input>
+      </div>
+
+      <!-- Botão de Entrar -->
+      <ion-button expand="block" type="submit" color="primary" [disabled]="loginForm.invalid" style="height: 48px; font-weight: bold;">
+        ENTRAR NO SISTEMA
+        <ion-icon slot="end" name="log-in-outline"></ion-icon>
+      </ion-button>
+
+    </form>
+
+    <!-- Rodapé (Opcional) -->
+    <div style="text-align: center; margin-top: 32px;">
+      <ion-button fill="clear" size="small" color="medium" type="button" (click)="avisarContatoTi()">
+        Esqueceu a senha?
+      </ion-button>
+    </div>
+
+  </div>
+
+</ion-content>

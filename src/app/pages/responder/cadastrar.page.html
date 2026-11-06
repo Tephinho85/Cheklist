@@ -1,0 +1,167 @@
+<form [formGroup]="novoChecklistForm" (ngSubmit)="salvarNovoChecklist()" class="page-container">
+  
+  <ion-header class="ion-no-border header-inspecao">
+    <ion-toolbar color="primary">
+      <ion-buttons slot="start">
+        <ion-menu-button></ion-menu-button>
+      </ion-buttons>
+      <ion-title>
+        {{ modoEdicao ? 'Alterar Formulário Existente' : 'Criar Novo Formulário' }}
+      </ion-title>
+    </ion-toolbar>
+
+    <div class="checklist-branding">
+      <div class="branding-info">
+        <h1>{{ modoEdicao ? 'Editando Estrutura [' + codigoChecklistEdicao + ']' : 'Estrutura do Formulário' }}</h1>
+        <p>Configure os cabeçalhos e as perguntas multinível da planilha</p>
+      </div>
+    </div>
+  </ion-header>
+
+  <ion-content class="dark-content ion-padding">
+    
+    <div class="custom-select-card mb-12">
+      <ion-input 
+        label="Código" 
+        label-placement="stacked" 
+        type="text" 
+        placeholder="Ex: 000002" 
+        formControlName="codigo">
+      </ion-input>
+    </div>
+
+    <div class="custom-select-card mb-12">
+      <ion-input 
+        label="Descrição" 
+        label-placement="stacked" 
+        type="text" 
+        placeholder="Ex: Checklist Diário" 
+        formControlName="descricao">
+      </ion-input>
+    </div>
+
+    <div class="custom-select-card mb-24">
+      <ion-input 
+        label="Revisão" 
+        label-placement="stacked" 
+        type="text" 
+        placeholder="Ex: 02-10-2026" 
+        formControlName="revisao">
+      </ion-input>
+    </div>
+
+    <!-- 🔹 INÍCIO DA INCLUSÃO DO CADASTRO DO AVALIADOR -->
+    <div class="section-header mb-16">
+      <h2>Dados do Avaliador</h2>
+      <span class="section-subtitle">Informações de quem aplicará a inspeção</span>
+    </div>
+
+    <div class="custom-select-card mb-12">
+      <ion-input 
+        label="Nome do Avaliador" 
+        label-placement="stacked" 
+        type="text" 
+        placeholder="Ex: Stephany Antônio Damas" 
+        formControlName="nomeAvaliador">
+      </ion-input>
+    </div>
+
+    <div class="custom-select-card mb-24">
+      <ion-input 
+        label="Setor / Departamento" 
+        label-placement="stacked" 
+        type="text" 
+        placeholder="Ex: SESMT" 
+        formControlName="setorAvaliador">
+      </ion-input>
+    </div>
+    <!-- 🔹 FIM DA INCLUSÃO DO CADASTRO DO AVALIADOR -->
+
+    <div class="section-header flex-between mb-16">
+      <h2>Perguntas da Ficha</h2>
+      <!-- 🔹 AJUSTE DO BOTÃO ADICIONAR REGISTRO -->
+      <ion-button fill="solid" size="small" color="primary" (click)="adicionarItemAoCadastro()">
+        <ion-icon slot="start" name="add-outline"></ion-icon>
+        Adicionar Registro
+      </ion-button>
+    </div>
+
+    <div formArrayName="itens">
+      @for (itemForm of itensArray.controls; track $index) {
+        <div [formGroupName]="$index" class="question-container mb-16">
+          
+          <div class="flex-between mb-12">
+            <span class="question-number">
+              Item #{{ $index + 1 }}
+            </span>
+            <ion-button fill="clear" color="danger" size="small" (click)="removerItemDoCadastro($index)">
+              <ion-icon slot="start" name="trash-outline"></ion-icon>
+              Excluir
+            </ion-button>
+          </div>
+
+          <div class="flex-gap-8 mb-12">
+            <ion-input 
+              type="text" 
+              placeholder="ID (Ex: 1.1)" 
+              formControlName="item" 
+              class="custom-input input-id">
+            </ion-input>
+
+            <ion-input 
+              type="text" 
+              placeholder="Descrição ou Pergunta" 
+              formControlName="descricao" 
+              class="custom-input flex-1">
+            </ion-input>
+          </div>
+
+          <div class="input-row mb-12">
+            <ion-select 
+              placeholder="Selecione o tipo de resposta" 
+              formControlName="tipoResposta" 
+              interface="popover" 
+              class="custom-select">
+              <ion-select-option value="">Apenas Título de Seção (Sem Pergunta / Sem Campo Obs)</ion-select-option>
+              <ion-select-option value="Selecao">Combobox (Status Seleção)</ion-select-option>
+              <ion-select-option value="Radio">Radiobox (Opções Visíveis)</ion-select-option>
+              <ion-select-option value="Numero">Número (Campos Numéricos)</ion-select-option>
+              <ion-select-option value="TextoLivre">Texto Livre (Resposta Escrita)</ion-select-option>
+            </ion-select>
+          </div>
+
+          @if (itemForm.get('tipoResposta')?.value === 'Selecao' || itemForm.get('tipoResposta')?.value === 'Radio') {
+            <div class="input-row mb-12">
+              <ion-input 
+                type="text" 
+                placeholder="Opções divididas por vírgula (Ex: Conforme,Não Conforme)" 
+                formControlName="opcoesTexto">
+              </ion-input>
+            </div>
+          }
+
+          @if (itemForm.get('tipoResposta')?.value !== '') {
+            <div class="radio-item py-4">
+              <ion-checkbox formControlName="obrigatorio" justify="start" label-placement="end">
+                Resposta Obrigatória?
+              </ion-checkbox>
+            </div>
+          }
+
+        </div>
+      }
+    </div>
+
+  </ion-content>
+
+  <ion-footer class="ion-no-border footer-action">
+    <ion-button 
+      expand="block" 
+      type="submit" 
+      [color]="modoEdicao ? 'warning' : 'primary'" 
+      class="btn-save-finish">
+      <ion-icon slot="start" name="save-outline"></ion-icon>
+      {{ modoEdicao ? 'SALVAR ALTERAÇÕES NO CHECKLIST' : 'SALVAR NOVO CHECKLIST' }}
+    </ion-button>
+  </ion-footer>
+</form>

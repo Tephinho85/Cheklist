@@ -1,0 +1,33 @@
+/* Essa classe 'segura' todo o login no meio da tela */
+.login-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Centraliza no meio (vertical) */
+  height: 100%;
+  max-width: 400px; /* Não deixa ficar gigante no computador */
+  margin: 0 auto; /* Centraliza no meio (horizontal) */
+}
+
+/* Deixa o texto de boas-vindas bonito */
+.logo-container {
+  text-align: center;
+  margin-bottom: 40px;
+
+  .app-title {
+    color: var(--ion-color-primary); /* Puxa a cor principal (Vermelho) */
+    font-weight: bold;
+    font-size: 28px;
+    margin-bottom: 8px;
+    margin-top: 16px;
+  }
+}
+
+/* Dá um espacinho embaixo dos campos */
+.mb-16 { margin-bottom: 16px; }
+.mb-24 { margin-bottom: 24px; }
+
+/* Ajusta as bordas do input outline para ficar mais elegante */
+ion-input {
+  --border-radius: 8px;
+  --background: #ffffff;
+}
